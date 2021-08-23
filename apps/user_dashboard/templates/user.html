@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}User information{% endblock title %}
+{% block content %}
+<div class="uk-card uk-card-default uk-card-body uk-border-rounded">
+    <h1>{{usuario.first_name}} {{usuario.last_name}}</h1>
+    <p>Registered at: {{usuario.created_at|date:"M dS, Y"}}</p>
+    <p>User id: #{{usuario.id}}</p>
+    <p>Email Address: {{usuario.email}}</p>
+    <p>Description: {{usuario.desc}}</p>
+    <form id="form_message" action="{% url 'createMessage' %}" method="POST">
+        {% csrf_token %}
+        <legend class="uk-legend">Leave a Message for {{usuario.first_name}}</legend>
+        <textarea class="uk-textarea" name="create_message" id="create_message" cols="50" rows="5"></textarea>
+        <input type="hidden" name="foruser" value="{{usuario.id}}">
+        <div class="uk-margin-top uk-flex uk-flex-right">
+            <input class="uk-button uk-button-large uk-button-primary uk-border-rounded" type="submit" value="Post" />
+        </div>
+    </form>
+</div>
+<div id="publicaciones" class="uk-card uk-card-default uk-card-body uk-border-rounded">
+    {% for message in message_users  %}
+    <hr class="uk-margin-small">
+    <p class="uk-text-primary uk-text-bold">{{message.user.first_name}} {{message.user.last_name}},
+        {{message.created_at}}</p>
+    <div>
+        <ul id="publicacion-{{message.id}}" class="uk-list uk-margin-left">
+            <li>
+                <p class="uk-text-italic">{{message.message}}</p>
+            </li>
+            {% for comment in comments  %}
+            {% if comment.message_id == message.id %}
+            <li id="comment-{{comment.id}}">
+                <hr class="uk-margin-small">
+                <ul class="uk-list uk-margin-left">
+                    <li>
+                        <p class="uk-text-bold">{{comment.user.first_name}} {{comment.user.last_name}},
+                            {{comment.created_at}}</p>
+                        <p class="uk-text-italic">{{comment.comment}}</p>
+                        {% if comment.user_id == request.session.id %}
+                        <button class="uk-button uk-button-small uk-button-danger uk-border-rounded"
+                            onclick="deleteComment({{comment.id}})" id="delete" uk-icon="icon: trash">Delete
+                            Comment
+                        </button>
+                        {% endif %}
+                    </li>
+                </ul>
+                {% endif %}
+                {% endfor %}
+            </li>
+        </ul>
+    </div>
+    <form id="form_comment" action="{% url 'commentMessage' idMessage=message.id %}" method="POST">
+        {% csrf_token %}
+        <textarea class="uk-margin-left uk-textarea uk-form-small" name="comment_message" id="comment_message" cols="50"
+            rows="2"></textarea>
+        <div class="uk-margin-top uk-flex uk-flex-right">
+            <input class="uk-button uk-button-secondary uk-border-rounded" type="submit" value="Post a comment" />
+        </div>
+    </form>
+    {% endfor %}
+</div>
+{% endblock content %}
+{% block javascript %}
+<script>
+    $("form#form_message").submit(function (event) {
+        event.preventDefault();
+        var form = $(this).serialize();
+        $("#alerts").empty();
+        $("#create_message").val("");
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: form,
+            dataType: "json",
+            success: function (data) {
+                if ("id" in data) {
+                    appendMessage(data);
+                    $("#alerts").append(
+                        "<div id='div-alert' class='uk-alert-succes' uk-alert><a class='uk-alert-close' uk-close></a><p>Publicacion agregada correctamente</p></div>"
+                    )
+                    setTimeout(function () {
+                        $("#alerts").empty();
+                    }, 3000);
+                } else {
+                    for (const property in data) {
+                        msg =
+                            "<div id='div-alert' class='uk-alert-danger' uk-alert><a class='uk-alert-close' uk-close></a><p>" +
+                            data[property] + "</p></div>"
+
+                        $("#alerts").append(msg);
+                    }
+
+                }
+            },
+        });
+    });
+
+    $("form#form_comment").submit(function (event) {
+        event.preventDefault();
+        var form = $(this).serialize();
+        $("#comment_message").val("");
+        $("#div-alert").remove();
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: form,
+            dataType: "json",
+            success: function (data) {
+                if ("id" in data) {
+                    console.log(data)
+                    appendComment(data);
+                } else {
+                    msg =
+                        "<div id='div-alert' class='uk-alert-danger' uk-alert><a class='uk-alert-close' uk-close></a><p>" +
+                        data.comment_message + "</p></div>"
+
+                    $(`#publicacion-${data.idMesagge}`).append(msg);
+                }
+            },
+        });
+    });
+
+
+    function appendMessage(msg) {
+        $("#publicaciones").prepend(`
+                    <hr class="uk-margin-small">
+                    <p class="uk-text-primary uk-text-bold">${msg.first_name} ${msg.last_name}, ${msg.created_at}</p>
+                    <div id="publicacion-${msg.id}">
+                        <ul class="uk-list uk-margin-left">
+                            <li>
+                                <p class="uk-text-italic">${msg.message}</p>
+                            </li>
+                        </ul>
+                    </div>
+                     <form action="/comment_message/${msg.id}" method="POST">
+                        {% csrf_token %}
+                        <textarea class="uk-margin-left uk-textarea uk-form-small" name="comment_message" id="comment_message" cols="50" rows="s"></textarea>
+                        <div class="uk-margin-top uk-flex uk-flex-right">
+                            <input class="uk-button uk-button-secondary uk-border-rounded" type="submit" value="Post a comment" />
+                        </div>
+                    </form>
+                    `);
+    }
+
+    function appendComment(cmt) {
+        $(`#publicacion-${cmt.idMessage}`).append(`
+            <li id="comment-${cmt.id}">
+                <hr class="uk-margin-small">
+                <ul class="uk-list uk-margin-left">
+                    <li>
+                        <p class="uk-text-bold">${cmt.first_name} ${cmt.last_name}, ${cmt.created_at}</p>
+                        <p class="uk-text-italic">${cmt.comment}</p>
+                        <button class="uk-button uk-button-small uk-button-danger uk-border-rounded" onclick="deleteComment(${cmt.id})" id="delete" uk-icon="icon: trash">Delete Comment </button>
+                    </li>
+                </ul>
+            </li>
+            `);
+    };
+
+    function deleteComment(idComment) {
+        $("#div-alert").remove();
+        $.ajax({
+            type: "GET",
+            url: "/comment_delete/" + idComment,
+            success: function (data) {
+                if ("id" in data) {
+                    $(`#comment-${idComment}`).remove();
+                } else {
+                    msg =
+                        "<div id='div-alert' class='uk-alert-danger' uk-alert><a class='uk-alert-close' uk-close></a><p>" +
+                        data.datetime + "</p></div>";
+                    $(`#comment-${idComment}`).append(msg);
+                }
+            },
+        });
+    };
+</script>
+{% endblock javascript %}

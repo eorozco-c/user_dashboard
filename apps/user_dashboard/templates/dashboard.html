@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock title %}
+{% block content %}
+<div class="uk-card uk-card-default uk-card-body uk-border-rounded">
+    <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
+        <h1 class="uk-navbar-left">Manage Users</h1>
+        {% if perfil.profile.level == 9 %}
+        <button class="uk-navbar-right uk-button uk-button-small uk-button-primary uk-border-rounded"
+            onClick="window.location='{% url 'addUser' %}'">Add New</button>
+        {% endif %}
+    </nav>
+    <table class="uk-table uk-table-hover uk-table-divider">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Created At</th>
+                <th>User Level</th>
+                {% if perfil.profile.level == 9 %}
+                <th>actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario in usuarios %}
+            <tr>
+                <td>{{usuario.id}}</td>
+                <td><a href="{% url 'showUser' idUser=usuario.id %}">{{usuario.first_name}} {{usuario.last_name}}</a>
+                </td>
+                <td>{{usuario.email}}</td>
+                <td>{{usuario.created_at|date:"M dS, Y"}}</td>
+                <td>{{usuario.profile.type}}</td>
+                {% if perfil.profile.level == 9 %}
+                <td> <a class="uk-button uk-button-secondary uk-button-small uk-border-rounded"
+                        href="{% url 'editUser' idUser=usuario.id %}" usuario="{{usuario.id}}" id="edit"
+                        uk-icon="icon: pencil">edit </a>
+                    <span> | </span> <a class="open-modal uk-button uk-button-danger uk-button-small uk-border-rounded"
+                        data-popup-url="{% url 'predestroy' idUser=usuario.id %}" href="#modal-sections" uk-toggle
+                        uk-icon="icon: trash">Remove </a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div id="modal-sections" uk-modal>
+    <div class="uk-modal-dialog">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+        <div class="uk-modal-header">
+            <h2>Are You sure you want to delete the following User?</h2>
+        </div>
+        <div class="uk-modal-body"></div>
+        <div class="uk-modal-footer uk-text-right">
+            <button class="uk-button uk-button-primary uk-modal-close" type="button">Cancel</button>
+            <button class="uk-button uk-button-danger uk-modal-close" type="button" id='delete'
+                uk-icon="icon: trash">Remove </button>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascript %}
+<script>
+    $(".open-modal").on("click", function () {
+        $.ajax({
+            type: "GET",
+            url: $(this).attr("data-popup-url"),
+            dataType: "json",
+            success: function (data) {
+                //console.log(data);
+                cursoDatos =
+                    "<h3 class='uk-modal-title'> Usuario: " + data['name'] + "</h3> <p> Email: " +
+                    data['email'] +
+                    "</p>";
+                $(".uk-modal-body").append(cursoDatos);
+                $("#delete").click(function () {
+                    window.location.href = "/destroy/" + data["id"];
+                })
+            }
+        });
+    });
+    $(".uk-modal-close").on("click", function () {
+        $(".uk-modal-body").empty();
+    })
+    $('body').click(function (e) {
+        if (e.target.id != "modal-sections")
+            $(".uk-modal-body").empty();
+    })
+</script>
+{% endblock javascript %}

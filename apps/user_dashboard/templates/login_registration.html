@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Login & Registration{% endblock title %}
+{% block content %}
+<div class="uk-margin-auto" uk-grid>
+    <div class="uk-width-1-2@m">
+        <div class="uk-card uk-card-default uk-card-body uk-border-rounded">
+            <h1>Login</h1>
+            <form id="login" class="uk-form-stacked" action="{% url 'login' %}" method="GET" autocomplete="on">
+                {% csrf_token %}
+                <label class="uk-form-label" for="email_login">Email:</label>
+                <input class="uk-input uk-form-width" type="email" name="email_login" id="email_login" />
+                <label class="uk-form-label" for="password_login">Password:</label>
+                <input class="uk-input uk-form-width" type="password" name="password_login" id="password_login" />
+                <div class="uk-margin-top uk-flex uk-flex-center">
+                    <input class="uk-button uk-button-primary uk-border-rounded" type="submit" value="Login" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="uk-width-1-2@m ">
+        <div class="uk-card uk-card-default uk-card-body uk-border-rounded">
+            <h1>Register</h1>
+            <form id="register" class="uk-form-stacked " action="{% url 'register' %}" method="POST" autocomplete="on">
+                {% csrf_token %}
+                <label class="uk-form-label" for="fname">First Name:</label>
+                <input class="uk-input uk-form-width" type="text" id="fname" name="fname" />
+                <label class="uk-form-label" for="lname">Last Name:</label>
+                <input class="uk-input uk-form-width" type="text" id="lname" name="lname" />
+                <label class="uk-form-label" for="email">Email:</label>
+                <input class="uk-input uk-form-width" type="email" name="email" id="email" />
+                <label class="uk-form-label" for="password">Password:</label>
+                <input class="uk-input uk-form-width" type="password" name="password" id="password" />
+                <label class="uk-form-label" for="confirm_password">Confirm Password:</label>
+                <input class="uk-input uk-form-width" type="password" name="confirm_password" id="confirm_password" />
+                <div class="uk-margin-top uk-flex uk-flex-center">
+                    <input class="uk-flex-right uk-button uk-button-primary uk-border-rounded" type="submit"
+                        value="Register" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block javascript %}
+<script>
+    $("form").submit(function (event) {
+        event.preventDefault();
+        var form = $(this).serialize();
+        $(".uk-text-danger").remove();
+        $.ajax({
+            type: "POST",
+            url: $(this).attr("action"),
+            data: form,
+            dataType: "json",
+            success: function (data) {
+                if ("resultado" in data) {
+                    window.location.href = "/";
+                } else {
+                    for (const property in data) {
+                        msg =
+                            "<div id='div-alert' class='uk-text-danger uk-margin-remove uk-padding-small'uk-alert><a class='uk-alert-close' uk-close></a><p>" +
+                            data[property] +
+                            "</p></div>";
+
+                        $("#" + property).after(msg)
+                    }
+                }
+            },
+        });
+    });
+</script>
+{% endblock %}

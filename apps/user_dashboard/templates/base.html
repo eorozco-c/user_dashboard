@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" class=" uk-background-secondary">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% load static %}
+    <!-- Font Awesome Icon Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .checked {
+            color: orange;
+        }
+    </style>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.7.1/dist/css/uikit.min.css" />
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.1/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.7.1/dist/js/uikit-icons.min.js"></script>
+    <link rel="shortcut icon" href="{%  static 'img/favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{%  static 'img/favicon.ico' %}" type="image/x-icon">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+
+<body>
+    <nav class="uk-navbar-container uk-border-rounded uk-text-center uk-navbar-transparent" uk-navbar>
+        <div class="uk-navbar-left">
+            <a href="{% url 'home' %}"><img data-src="{%  static 'img/logo.png' %}" width="150" height="50"
+                    alt="logo django" uk-img></a>
+            {% if "id" in request.session %}
+            <a class="uk-margin-left" href="{% url 'dashboard' %}"> Dashboard </a>
+            <a class="uk-margin-left" href="{% url 'editProfile' %}"> Profile </a>
+            {% else %}
+            <a class="uk-margin-left" href="{% url 'home' %}"> Home </a>
+            {% endif %}
+        </div>
+        <div class="uk-navbar-right">
+            {% if "id" in request.session %}
+            <a class="uk-margin-right" href="{% url 'logout' %}">Logout</a>
+            {% else %}
+            <a class="uk-margin-right" href="{% url 'signin' %}">Sign in</a>
+            {% endif %}
+
+        </div>
+    </nav>
+    <hr class="uk-margin-small">
+    <header></header>
+    <main class="uk-container">
+        {% block content %} {% endblock %}
+    </main>
+    <footer></footer>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    {% block javascript %}{% endblock javascript%}
+</body>
+
+</html>
