@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock title %}
 {% block content %}
-<div class="uk-card uk-card-default uk-card-body uk-border-rounded">
-    <nav class="uk-navbar-container uk-navbar-transparent" uk-navbar>
+<div class="uk-overflow-auto uk-card uk-card-default uk-card-body uk-border-rounded">
+    <nav class=" uk-navbar-transparent">
         <h1 class="uk-navbar-left">Manage Users</h1>
         {% if perfil.profile.level == 9 %}
         <button class="uk-navbar-right uk-button uk-button-small uk-button-primary uk-border-rounded"

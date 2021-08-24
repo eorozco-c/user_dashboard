@@ -37,9 +37,9 @@
         </div>
         <div class="uk-navbar-right">
             {% if "id" in request.session %}
-            <a class="uk-margin-right" href="{% url 'logout' %}">Logout</a>
+            <a class="uk-margin-right uk-margin-left" href="{% url 'logout' %}">Logout</a>
             {% else %}
-            <a class="uk-margin-right" href="{% url 'signin' %}">Sign in</a>
+            <a class="uk-margin-right uk-margin-left" href="{% url 'signin' %}">Sign in</a>
             {% endif %}
 
         </div>

@@ -36,7 +36,6 @@ def register_user(request):
             usuario = User.objects.create(first_name=fname,last_name=lname,email=email,password=password_hs,profile=TypeProfile.objects.get(level=1))
         except:
             usuario = User.objects.create(first_name=fname,last_name=lname,email=email,password=password_hs,profile=TypeProfile.objects.get(level=9))
-        #request.session["id"] = usuario.id
         return JsonResponse({"resultado": usuario.id })
     return redirect("/")
 
@@ -78,8 +77,6 @@ def dashboard(request):
             }
             return render(request,"dashboard.html", context)
     return redirect("/")
-
-
 
 def update_user(request,idUser):
     if request.method == "POST":
@@ -214,6 +211,7 @@ def create_message(request):
                 "created_at" : datetime.strftime(new_message.created_at, "%d de %B de %Y a las %H:%M")
             }
             return JsonResponse(data)
+            #redirect(f"/show/{forUser.id}")
     return redirect("/")
 
 def comment_message(request, idMessage):

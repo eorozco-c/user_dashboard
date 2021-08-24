@@ -7,6 +7,7 @@
     <p>User id: #{{usuario.id}}</p>
     <p>Email Address: {{usuario.email}}</p>
     <p>Description: {{usuario.desc}}</p>
+    <div id="alerts"></div>
     <form id="form_message" action="{% url 'createMessage' %}" method="POST">
         {% csrf_token %}
         <legend class="uk-legend">Leave a Message for {{usuario.first_name}}</legend>
@@ -44,9 +45,9 @@
                         {% endif %}
                     </li>
                 </ul>
-                {% endif %}
-                {% endfor %}
             </li>
+            {% endif %}
+            {% endfor %}
         </ul>
     </div>
     <form id="form_comment" action="{% url 'commentMessage' idMessage=message.id %}" method="POST">
@@ -65,7 +66,7 @@
     $("form#form_message").submit(function (event) {
         event.preventDefault();
         var form = $(this).serialize();
-        $("#alerts").empty();
+        $("#div-alert").remove();
         $("#create_message").val("");
         $.ajax({
             type: "POST",
@@ -74,13 +75,14 @@
             dataType: "json",
             success: function (data) {
                 if ("id" in data) {
-                    appendMessage(data);
-                    $("#alerts").append(
-                        "<div id='div-alert' class='uk-alert-succes' uk-alert><a class='uk-alert-close' uk-close></a><p>Publicacion agregada correctamente</p></div>"
-                    )
-                    setTimeout(function () {
-                        $("#alerts").empty();
-                    }, 3000);
+                    //appendMessage(data);
+                    //$("#alerts").append(
+                    //    "<div id='div-alert' class='uk-alert-succes' uk-alert><a class='uk-alert-close' uk-close></a><p>Publicacion agregada correctamente</p></div>"
+                    //)
+                    //setTimeout(function () {
+                    //    $("#alerts").empty();
+                    //}, 3000);
+                    window.location.reload();
                 } else {
                     for (const property in data) {
                         msg =
@@ -114,12 +116,35 @@
                         "<div id='div-alert' class='uk-alert-danger' uk-alert><a class='uk-alert-close' uk-close></a><p>" +
                         data.comment_message + "</p></div>"
 
-                    $(`#publicacion-${data.idMesagge}`).append(msg);
+                    //$(`#publicacion-${data.idMesagge}`).append(msg);
+                    $('#form_comment').before(msg);
                 }
             },
         });
     });
 
+    function formAppendComment() {
+        var form = $("#form_comment").serialize();
+        $("#comment_message").val("");
+        $("#div-alert").remove();
+        $.ajax({
+            type: "POST",
+            url: $("#form_comment").attr("action"),
+            data: form,
+            dataType: "json",
+            success: function (data) {
+                if ("id" in data) {
+                    console.log(data)
+                    appendComment(data);
+                } else {
+                    msg =
+                        "<div id='div-alert' class='uk-alert-danger' uk-alert><a class='uk-alert-close' uk-close></a><p>" +
+                        data.comment_message + "</p></div>"
+                    $('#form_comment').before(msg);
+                }
+            },
+        });
+    }
 
     function appendMessage(msg) {
         $("#publicaciones").prepend(`
@@ -132,7 +157,7 @@
                             </li>
                         </ul>
                     </div>
-                     <form action="/comment_message/${msg.id}" method="POST">
+                     <form id="" action="/comment_message/${msg.id}" method="POST">
                         {% csrf_token %}
                         <textarea class="uk-margin-left uk-textarea uk-form-small" name="comment_message" id="comment_message" cols="50" rows="s"></textarea>
                         <div class="uk-margin-top uk-flex uk-flex-right">
