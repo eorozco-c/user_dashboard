@@ -64,6 +64,8 @@
         event.preventDefault();
         var form = $(this).serialize();
         $(".uk-text-danger").remove();
+        $(".uk-text-success").remove();
+        var formAlert = $(this)
         $.ajax({
             type: "POST",
             url: $(this).attr("action"),
@@ -71,7 +73,10 @@
             dataType: "json",
             success: function (data) {
                 if ("resultado" in data) {
-                    window.location.href = "/edit";
+                    msg =
+                        "<div id='div-alert' class='uk-text-success uk-margin-remove uk-padding-small'uk-alert><a class='uk-alert-close' uk-close></a><p>Actualizado correctamente</p></div>";
+                    formAlert.prepend(msg)
+                    //window.location.href = "/edit";
                 } else {
                     for (const property in data) {
                         msg =

@@ -14,6 +14,9 @@ def signin(request):
     if request.method == "GET":
         if "id" in request.session:
             return redirect("/dashboard")
+        if TypeProfile.objects.count() == 0:
+            TypeProfile.objects.create(type="admin",level=9)
+            TypeProfile.objects.create(type="normal",level=1)
     return render(request, "login_registration.html")
 
 def add_user(request):
@@ -31,11 +34,10 @@ def register_user(request):
         errors = User.objects.validator_reg(request.POST)
         if len(errors) > 0:
             return JsonResponse(errors)
-        try:
-            User.objects.get(id=1)
-            usuario = User.objects.create(first_name=fname,last_name=lname,email=email,password=password_hs,profile=TypeProfile.objects.get(level=1))
-        except:
+        if User.objects.count() == 0:
             usuario = User.objects.create(first_name=fname,last_name=lname,email=email,password=password_hs,profile=TypeProfile.objects.get(level=9))
+            return JsonResponse({"resultado": usuario.id })
+        usuario = User.objects.create(first_name=fname,last_name=lname,email=email,password=password_hs,profile=TypeProfile.objects.get(level=1))
         return JsonResponse({"resultado": usuario.id })
     return redirect("/")
 
@@ -176,6 +178,7 @@ def edit_profile(request):
                 return redirect("/dashboard")
             user.desc = request.POST["description"]
             user.save()
+            return JsonResponse({"resultado" : user.id})
     return redirect("/dashboard")
 
 def show_user(request, idUser):
